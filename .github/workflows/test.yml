@@ -1,0 +1,49 @@
+name: Test
+run-name: ${{ github.actor }} is running the test suite
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.1','8.2','8.3']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: laravel
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Setup PHP
+        id: setup-php
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: laravel/pint, overtrue/phplint
+      - name: Check PHP syntax
+        run: phplint --exclude=*.log .
+      - name: Check code style
+        run: pint --test
+      - name: Install composer dependencies
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+        run: | 
+          composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          composer update
+      # - name: Run tests
+      #   env:
+      #     DB_HOST: 127.0.0.1
+      #     DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+      #     DB_USERNAME: root
+      #     DB_PASSWORD: null
+      #     DB_DATABASE: laravel
+      #   run: vendor/bin/phpunit
