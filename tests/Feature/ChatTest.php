@@ -4,7 +4,6 @@ use App\Models\Chat;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Tests\TestCase;
 
 class ChatTest extends TestCase
@@ -24,17 +23,16 @@ class ChatTest extends TestCase
     {
         // Create a chat
         $chat = Chat::factory()->create();
-    
+
         // Debugging: Output the chat and associated user
         dd($chat, $chat->user);
-    
+
         // Act as a user and visit the chat page
         $response = $this->actingAs($chat->user, 'web')->get(route('chat.show', $chat->id));
-    
+
         // Assert chat data is displayed
         $response->assertInertia(fn ($page) => $page->has('chat', fn ($chat) => $chat->id === $chat->id));
     }
-    
 
     /**
      * Tests creating a new chat and sending a prompt.
@@ -44,11 +42,11 @@ class ChatTest extends TestCase
         // Act as a user and send a prompt
         $prompt = 'What is the meaning of life?';
         $response = $this->actingAs(User::factory()->create())
-                      ->postJson(route('chat.store'), ['promt' => $prompt]);
-    
+            ->postJson(route('chat.store'), ['promt' => $prompt]);
+
         // Assert response status
         $response->assertStatus(200);
-    
+
         // Assert response content and structure only if the response is 200
         if ($response->status() === 200) {
             $response->assertJsonStructure(['chat' => ['id', 'context']]);

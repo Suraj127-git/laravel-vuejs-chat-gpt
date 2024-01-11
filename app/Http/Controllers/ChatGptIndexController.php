@@ -9,11 +9,11 @@ use Inertia\Response;
 
 class ChatGptIndexController extends Controller
 {
-    public function __invoke(string $id = null): Response
+    public function __invoke(?string $id = null): Response
     {
         return Inertia::render('Chat/ChatIndex', [
             'chat' => fn () => $id ? Chat::findOrFail($id) : null,
-            'messages' => Chat::latest()->where('user_id', Auth::id())->get()
+            'messages' => Chat::latest()->where('user_id', Auth::id())->get(),
         ]);
     }
 }

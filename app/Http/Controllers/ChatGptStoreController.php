@@ -4,14 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreChatRequest;
 use App\Models\Chat;
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Auth;
 use OpenAI\Laravel\Facades\OpenAI;
 
-
 class ChatGptStoreController extends Controller
 {
-    public function __invoke(StoreChatRequest $request, string $id = null)
+    public function __invoke(StoreChatRequest $request, ?string $id = null)
     {
         $messages = [];
         if ($id) {
@@ -34,17 +32,16 @@ class ChatGptStoreController extends Controller
             $chat = Chat::updateOrCreate(
                 [
                     'id' => $id,
-                    'user_id' => Auth::id()
+                    'user_id' => Auth::id(),
                 ],
                 [
-                    'context' => $messages
+                    'context' => $messages,
                 ]
             );
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            print('Error: ' . $e->getMessage());
+            echo 'Error: '.$e->getMessage();
             dd('Die');
         }
-        
 
         return redirect()->route('chat.show', [$chat->id]);
     }

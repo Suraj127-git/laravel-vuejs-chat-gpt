@@ -22,7 +22,7 @@ class StoreChatRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'promt' => ['required', 'string']
+            'promt' => ['required', 'string'],
         ];
     }
 }
